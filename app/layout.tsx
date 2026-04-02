@@ -27,7 +27,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  await syncCurrentUser();
+  try {
+    await syncCurrentUser();
+  } catch (error) {
+    console.error("Failed to sync user in RootLayout:", error);
+  }
   return (
     <html
       lang="en"

@@ -8,7 +8,15 @@ import { createFeedback } from "./actions";
 import Link from "next/link";
 import { ArrowLeft, Send } from "lucide-react";
 
-export default function NewFeedbackPage() {
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+
+export default async function NewFeedbackPage() {
+  const { userId } = await auth();
+
+  if (!userId) {
+    redirect("/sign-in");
+  }
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <Link 

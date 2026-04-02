@@ -11,9 +11,10 @@ import {
 } from "./ui/table";
 import { getCategoryDesign } from "@/app/data/category-data";
 import { Badge } from "./ui/badge";
-import { Edit, Save, ThumbsUp, User, X } from "lucide-react";
+import { Edit, Save, ThumbsUp, User, X, Trash2 } from "lucide-react";
 import { STATUS_GROUPS, STATUS_ORDER } from "@/app/data/status-data";
 import { Button } from "./ui/button";
+import { useRouter } from "next/navigation";
 import {
   Select,
   SelectContent,
@@ -52,6 +53,7 @@ interface Post {
 }
 
 export default function AdminFeedbackTable({ posts }: { posts: Post[] }) {
+  const router = useRouter();
   const [editingPostId, setEditingPostId] = useState<number | null>(null);
   const [postStatus, setPostStatus] = useState<Record<number, string>>(
     Object.fromEntries(posts.map((post) => [post.id, post.status])),
@@ -108,6 +110,34 @@ export default function AdminFeedbackTable({ posts }: { posts: Post[] }) {
       console.error("Failed to update status: ", error);
       toast.dismiss(loadingToast);
       toast.error("failed to update feedback status, Please try again.");
+    }
+  };
+  
+  const handleDelete = async (postId: number) => {
+    if(!confirm("Are you sure you want to delete this feedback? This action cannot be undone.")) return;
+    
+    // Show loading toast
+    const loadingToast = toast.loading("Deleting feedback...");
+    
+    try {
+        const response = await fetch(`/api/feedback/${postId}`, {
+            method: "DELETE",
+        });
+        
+        if(!response.ok) {
+            throw new Error("Failed to delete feedback");
+        }
+        
+        // Dismiss loading toast
+        toast.dismiss(loadingToast);
+        toast.success("Feedback deleted successfully!");
+        
+        // Refresh the page to update the table
+        router.refresh();
+    } catch(error) {
+        console.error("Failed to delete feedback: ", error);
+        toast.dismiss(loadingToast);
+        toast.error("Failed to delete feedback. Please try again.");
     }
   };
 
@@ -257,6 +287,15 @@ export default function AdminFeedbackTable({ posts }: { posts: Post[] }) {
                         >
                           <Edit className="h-3 w-3" />
                           Edit
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(post.id)}
+                          className="gap-1 h-8 text-destructive hover:text-white hover:bg-destructive ml-2"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                          Delete
                         </Button>
                       </>
                     )}

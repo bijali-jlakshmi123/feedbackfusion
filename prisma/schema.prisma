@@ -35,9 +35,9 @@ model Post {
 } 
 model Vote {
   id        Int     @id @default(autoincrement()) 
-  user      User    @relation(fields: [userId], references: [id])
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
-  post      Post    @relation(fields: [postId], references: [id])
+  post      Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId    Int
  @@unique([userId,postId])
   @@map("votes")
